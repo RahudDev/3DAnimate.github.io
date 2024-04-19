@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Animation Background with Stars and Shapes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Set up the scene, camera, and renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create a star field
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsPositions = [];
+    for (let i = 0; i < 10000; i++) {
+      const x = THREE.MathUtils.randFloatSpread(2000);
+      const y = THREE.MathUtils.randFloatSpread(2000);
+      const z = THREE.MathUtils.randFloatSpread(2000);
+      starsPositions.push(x, y, z);
+    }
+    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsPositions, 3));
+    const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+    const starField = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(starField);
+
+    // Create shapes
+    const shapes = [];
+
+    const addShape = (geometry, color, position) => {
+      const material = new THREE.MeshBasicMaterial({ color });
+      const shape = new THREE.Mesh(geometry, material);
+      shape.position.copy(position);
+      scene.add(shape);
+      shapes.push(shape);
+    };
+
+    // Add different types of shapes
+    const geometry1 = new THREE.BoxGeometry(50, 50, 50);
+    const position1 = new THREE.Vector3(-100, 0, -500); // Position for first shape
+    addShape(geometry1, 0xff0000, position1); // Red color
+
+    const geometry2 = new THREE.SphereGeometry(25, 32, 32);
+    const position2 = new THREE.Vector3(0, 0, -500); // Position for second shape
+    addShape(geometry2, 0x00ff00, position2); // Green color
+
+    const geometry3 = new THREE.TorusGeometry(30, 15, 16, 100);
+    const position3 = new THREE.Vector3(100, 0, -500); // Position for third shape
+    addShape(geometry3, 0x0000ff, position3); // Blue color
+
+    // Animate the shapes
+    function animateShapes() {
+      requestAnimationFrame(animateShapes);
+      // Rotate shapes
+      shapes.forEach((shape, index) => {
+        shape.rotation.x += 0.01 * (index + 1);
+        shape.rotation.y += 0.01 * (index + 1);
+      });
+      renderer.render(scene, camera);
+    }
+
+    // Animate the stars
+    function animateStars() {
+      requestAnimationFrame(animateStars);
+
+      // Rotate stars
+      starField.rotation.x += 0.0005;
+      starField.rotation.y += 0.0005;
+
+      // Move stars
+      starField.position.z += Math.sin(Date.now() * 0.0005) * 0.5;
+
+      // Scale stars
+      starField.scale.x = 1 + Math.sin(Date.now() * 0.001) * 0.1;
+      starField.scale.y = 1 + Math.sin(Date.now() * 0.001) * 0.1;
+
+      // Randomly change star positions
+      const positions = starsGeometry.attributes.position.array;
+      for (let i = 0; i < positions.length; i += 3) {
+        positions[i] += Math.sin(Date.now() * 0.0001) * 0.1;
+        positions[i + 1] += Math.cos(Date.now() * 0.0001) * 0.1;
+        positions[i + 2] += Math.sin(Date.now() * 0.0001) * 0.1;
+      }
+      starsGeometry.attributes.position.needsUpdate = true;
+
+      renderer.render(scene, camera);
+    }
+
+    // Set up camera position
+    camera.position.z = 100;
+
+    // Start the animation loops
+    animateShapes();
+    animateStars();
+  </script>
+</body>
+</html>
